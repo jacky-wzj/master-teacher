@@ -113,7 +113,7 @@ Where this lesson sits in the overall course.
 - If 3+ consecutive theory paragraphs without student interaction → insert a question
 - Keep messages readable; split into multiple messages when needed
 
-### Phase 4: Track Progress
+### Phase 4: Track Progress and Report
 
 Update `progress/tracking.md` after **every interaction**, not just at lesson completion.
 
@@ -139,6 +139,38 @@ When a lesson is interrupted mid-way, record exactly where:
 ```
 
 This ensures resumption picks up at the exact point, not at the lesson start.
+
+**Lesson report** (after each lesson completion):
+When a lesson is completed, deliver a lesson report to the student:
+
+```
+Lesson Report:
+- Lesson: [number] [title]
+- Score: X/3
+- Time spent: approximate
+- Strengths: what the student understood well
+- Weak points: what needs revisiting
+- Key takeaway: one sentence summary of the most important thing learned
+```
+
+**Progress overview** (after each lesson report):
+Immediately after the lesson report, show a visual progress overview of the entire course.
+
+- If image generation is available: generate a progress map image showing all lessons as nodes, completed ones highlighted, current position marked, remaining ones dimmed. Include percentage complete. Make it visually rewarding — seeing progress should feel good.
+- If image generation is not available: use an ASCII progress bar or visual map:
+  ```
+  Course Progress: [===========.................] 4/12 (33%)
+
+  ✅ Lesson 1: Architecture Overview
+  ✅ Lesson 2: Tool System
+  ✅ Lesson 3: QueryEngine
+  ✅ Lesson 4: Context Management     ← just completed
+  ⬜ Lesson 5: Multi-Agent
+  ⬜ Lesson 6: Safety System
+  ...
+  ```
+
+The purpose: every time the student finishes a lesson, they see how far they have come. Small wins compound into motivation.
 
 ### Phase 5: Resume (when student returns after interruption)
 
