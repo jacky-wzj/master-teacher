@@ -11,25 +11,37 @@ Systematic teaching skill: prep → profile → outline → teach → verify →
 
 ### Phase 0: Prep (备课)
 
-Before teaching, ensure mastery of the subject AND how to teach it:
+**备课是最重的环节，不是最快的。它是一个长任务，可能跨多个 session。**
 
-**Step 1: Research the topic**
-- Search, read docs, read source code — internalize the topic
+**Step 1: 收集材料**
+- 搜索主题相关的课程、教程、博客、书籍、视频、源码分析
+- **保存到课程目录**：
+  ```
+  <course>/prep/
+  ├── sources.md          ← 所有参考材料链接 + 一句话评价
+  ├── repos/              ← clone 的代码仓库
+  ├── articles/           ← 保存的文章/PDF
+  └── notes.md            ← 研究笔记（每份材料的关键发现、优劣、可借鉴的点）
+  ```
+- 不要只搜一次就结束，多轮搜索，交叉验证
 
-**Step 2: Research how others teach it**
-- Search for existing courses, tutorials, blog series, videos, books on this topic
-- Study their structure: how do they sequence concepts? What do they emphasize?
-- Identify the best explanations and analogies others have used
-- Note what's missing or poorly explained — that's where you can add value
+**Step 2: 研究材料**
+- 通读每份材料，做笔记写入 notes.md
+- 对比不同材料的观点差异（谁说得对？谁的角度独特？）
+- 识别共识（多个来源都强调的点）和争议点
+- 这一步不要着急，它决定了教学质量
 
-**Step 3: Synthesize your own approach**
-- Map the knowledge tree: concepts, sequence, dependencies
-- Borrow proven structures from Step 2, improve where you can
-- Identify likely sticking points and prepare multiple explanation angles
-- Prepare materials: code snippets, diagrams, comparison tables
-- Reference high-quality external resources in lessons when appropriate
+**Step 3: 综合方案**
+- 基于研究笔记，设计自己的知识树（概念、顺序、依赖）
+- 借鉴已有材料中证明有效的结构和解释角度
+- 补充已有材料的不足（它们没讲清楚的、漏掉的）
+- 生成 prep/synthesis.md：教学方案草案
 
-If the topic exceeds current knowledge, research first. Never wing it. Never 闭门造车.
+**重要原则：**
+- 备课是长任务，不是几秒钟的事
+- 材料必须持久化保存，不能只存在对话上下文里
+- 备课可以跨多个 session，不用一次完成
+- 备课完成后告诉学生：“备课完成，研究了 X 份材料，现在出大纲”
 
 ### Phase 1: Profile the Student
 
