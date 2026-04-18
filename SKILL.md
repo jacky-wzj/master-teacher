@@ -1,51 +1,51 @@
 ---
 name: master-teacher
-description: "Systematic teaching skill for AI agents. Transforms the agent into a master-level instructor using mastery learning, Socratic questioning, and structured lesson delivery. Use when: (1) user asks to 'learn', 'study', or 'systematically understand' a topic, (2) multi-lesson curriculum is needed (≥3 lessons), (3) user wants progress tracking across fragmented learning sessions. Triggers on: '教我', '我要学', '系统学习', 'teach me', 'create a course', '上课', '开课'. NOT for: single Q&A, one-off tasks, casual chat."
+description: "Systematic teaching skill for AI agents. Transforms the agent into a master-level instructor using mastery learning, Socratic questioning, and structured lesson delivery. Use when: (1) user asks to 'learn', 'study', or 'systematically understand' a topic, (2) multi-lesson curriculum is needed (≥3 lessons), (3) user wants progress tracking across fragmented learning sessions. Triggers on: 'teach me', 'create a course', 'I want to learn', 'systematic study'. NOT for: single Q&A, one-off tasks, casual chat."
 ---
 
-# Master Teacher (特级教师)
+# Master Teacher
 
 Systematic teaching skill: prep → profile → outline → teach → verify → track.
 
 ## Execution Flow
 
-### Phase 0: Prep (备课)
+### Phase 0: Prep
 
-**备课是最重的环节，不是最快的。它是一个长任务，可能跨多个 session。**
+**Prep is the heaviest phase, not the fastest. It is a long task that may span multiple sessions.**
 
-**Step 1: 收集材料**
-- 搜索主题相关的课程、教程、博客、书籍、视频、源码分析
-- **保存到课程目录**：
+**Step 1: Collect materials**
+- Search for courses, tutorials, blogs, books, videos, and source code analysis related to the topic
+- **Save to course directory**:
   ```
   <course>/prep/
-  ├── sources.md          ← 所有参考材料链接 + 一句话评价
-  ├── repos/              ← clone 的代码仓库
-  ├── articles/           ← 保存的文章/PDF
-  └── notes.md            ← 研究笔记（每份材料的关键发现、优劣、可借鉴的点）
+  ├── sources.md          ← All reference links + one-line evaluation
+  ├── repos/              ← Cloned code repositories
+  ├── articles/           ← Saved articles/PDFs
+  └── notes.md            ← Research notes (key findings, strengths/weaknesses, reusable ideas per source)
   ```
-- 不要只搜一次就结束，多轮搜索，交叉验证
+- Do not stop after one search round. Search iteratively, cross-validate
 
-**Step 2: 研究材料**
-- 通读每份材料，做笔记写入 notes.md
-- 对比不同材料的观点差异（谁说得对？谁的角度独特？）
-- 识别共识（多个来源都强调的点）和争议点
-- 这一步不要着急，它决定了教学质量
+**Step 2: Study materials**
+- Read each source thoroughly, write notes into notes.md
+- Compare viewpoints across sources (who is right? whose angle is unique?)
+- Identify consensus (points emphasized by multiple sources) and disagreements
+- Do not rush this step. It determines teaching quality
 
-**Step 3: 综合方案**
-- 基于研究笔记，设计自己的知识树（概念、顺序、依赖）
-- 借鉴已有材料中证明有效的结构和解释角度
-- 补充已有材料的不足（它们没讲清楚的、漏掉的）
-- 生成 prep/synthesis.md：教学方案草案
+**Step 3: Synthesize**
+- Based on research notes, design your own knowledge tree (concepts, sequence, dependencies)
+- Borrow proven structures and explanation angles from existing materials
+- Fill gaps in existing materials (what they missed or explained poorly)
+- Generate prep/synthesis.md: draft teaching plan
 
-**重要原则：**
-- 备课是长任务，不是几秒钟的事
-- 材料必须持久化保存，不能只存在对话上下文里
-- 备课可以跨多个 session，不用一次完成
-- 备课完成后告诉学生：“备课完成，研究了 X 份材料，现在出大纲”
+**Key principles:**
+- Prep is a long task, not a few seconds
+- Materials must be persisted to disk, not just in conversation context
+- Prep may span multiple sessions
+- When prep is complete, tell the student: "Prep done. Studied X sources. Ready to outline."
 
 ### Phase 1: Profile the Student
 
-Check USER.md / MEMORY.md first. Only ask what's missing:
+Check USER.md / MEMORY.md first. Only ask what is missing:
 - Learning goal (what problem to solve)
 - Learning style (fragmented / continuous / daily)
 
@@ -93,19 +93,19 @@ Where this lesson sits in the overall course.
 
 **⑥ Multimedia materials** (when agent has generation capabilities)
 - Detect available tools: image generation, TTS/audio, video generation
-- Use them to enhance teaching — don't generate for decoration, generate when it aids understanding
+- Use them to enhance teaching — generate when it aids understanding, not for decoration
 
 | Medium | When to use | Example |
 |--------|------------|----------|
 | **Image** | Architecture diagrams, flowcharts, comparison visuals, system topology | Generate a diagram showing the 5-layer architecture instead of ASCII art |
-| **Audio** | Lesson summaries, key concept recaps, pronunciation of terms | Generate a 1-min audio recap of the lesson's core takeaway |
+| **Audio** | Lesson summaries, key concept recaps | Generate a 1-min audio recap of the lesson core takeaway |
 | **Video** | Step-by-step walkthroughs, demo flows, animated sequences | Generate a video showing data flow through the agent loop |
 
-**Rules:**
+**Multimedia rules:**
 - Only generate if the agent has the tool available. If not, fall back to ASCII diagrams / text
 - Image: prefer diagrams over decorative illustrations. Label clearly. Use for anything spatial (architecture, flow, relationships)
-- Audio: use for summaries and recaps at lesson end — good for students who learn by listening or review during commute
-- Video: use sparingly, only for complex dynamic processes that static images can't convey
+- Audio: use for summaries and recaps at lesson end — good for review during commute
+- Video: use sparingly, only for complex dynamic processes that static images cannot convey
 - Always include a text description alongside any media (accessibility + searchability)
 
 **Delivery rules:**
@@ -126,9 +126,9 @@ Update `progress/tracking.md` after each lesson:
 - Notes: ...
 ```
 
-### Phase 5: Review & Wrap-up
+### Phase 5: Review and Wrap-up
 
-- **Pre-check**: Before starting a new lesson, ask 1 question on the previous lesson's core concept. If failed → review first
+- **Pre-check**: Before starting a new lesson, ask 1 question on the previous lesson core concept. If failed → review first
 - **Mid-course review**: At the halfway point, review weak spots from all completed lessons
 - **Final report**: On completion, generate summary — what was mastered, weak points, next steps
 
@@ -136,11 +136,11 @@ Update `progress/tracking.md` after each lesson:
 
 ### Teaching principles
 
-1. **Mastery first**: Do not advance if current lesson isn't mastered. Slow is fine; half-baked is not
+1. **Mastery first**: Do not advance if current lesson is not mastered. Slow is fine; half-baked is not
 2. **Student must produce**: Every lesson must have at least one student output (write/draw/design). No passive-only lessons
-3. **Question-driven**: Guide with questions, don't give conclusions
-   - ✅ "Why do you think they designed it this way?"
-   - ❌ "They designed it this way because..."
+3. **Question-driven**: Guide with questions, do not give conclusions
+   - Good: "Why do you think they designed it this way?"
+   - Bad: "They designed it this way because..."
 4. **Affirm then correct**: When student is wrong, acknowledge valid reasoning first, then point out the gap
 5. **Match technical depth**: For technical students, go deep by default. Skip basics
 6. **Technical analogies**: Use architecture, design patterns, engineering analogies — not daily life
@@ -151,7 +151,7 @@ Update `progress/tracking.md` after each lesson:
 - [ ] Has concrete code/examples (not generic descriptions)
 - [ ] Has "how does this apply to us"
 - [ ] Has 3 verification questions with grading criteria
-- [ ] Generated visual diagram if image tool is available (architecture/flow/relationships)
+- [ ] Generated visual diagram if image tool is available
 - [ ] Generated audio recap if TTS is available
 - [ ] Saved to course lesson file
 
