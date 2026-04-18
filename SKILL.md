@@ -115,20 +115,49 @@ Where this lesson sits in the overall course.
 
 ### Phase 4: Track Progress
 
-Update `progress/tracking.md` after each lesson:
+Update `progress/tracking.md` after **every interaction**, not just at lesson completion.
 
+**Inter-lesson tracking** (between lessons):
 ```markdown
 | Lesson | Title | Status | Date | Score | Weak points |
-
-### Lesson N (date)
-- Score: X/3
-- Weak points: ...
-- Notes: ...
+|--------|-------|--------|------|-------|-------------|
+| 1 | ... | completed | 2026-04-18 | 3/3 | none |
+| 2 | ... | in-progress | 2026-04-19 | - | - |
 ```
 
-### Phase 5: Review and Wrap-up
+**Intra-lesson tracking** (within a lesson):
+Each lesson has steps: position → concepts → code → practice → multimedia → verify.
+When a lesson is interrupted mid-way, record exactly where:
+```markdown
+### Lesson 2 — in progress
+- Started: 2026-04-19 21:00
+- Completed steps: position, concepts (partial — covered design intent, not yet comparison)
+- Next step: finish comparison in concepts, then code
+- Student's last response: "..."
+- Key points covered so far: ...
+- Key points remaining: ...
+```
+
+This ensures resumption picks up at the exact point, not at the lesson start.
+
+### Phase 5: Resume (when student returns after interruption)
+
+When the student comes back after any break (minutes, hours, or days):
+
+1. **Read progress file** — check where they left off
+2. **Quick recall** — before continuing, do a 1-2 question micro-review:
+   - If mid-lesson: "Last time we covered X. Quick check — can you explain X in one sentence?"
+   - If between lessons: "Last time you finished Lesson N about X. What was the key takeaway?"
+3. **Assess readiness**:
+   - Student recalls well → continue from breakpoint
+   - Student is fuzzy → brief recap of what was covered, then continue
+   - Student forgot → re-teach the forgotten part before moving forward
+4. **Resume from exact breakpoint** — do not restart the lesson from scratch
+
+### Phase 6: Review and Wrap-up
 
 - **Pre-check**: Before starting a new lesson, ask 1 question on the previous lesson core concept. If failed → review first
+- **Spaced review**: At lesson 3, briefly revisit lesson 1 key concept. At lesson 6, revisit lessons 1-3. Spacing improves long-term retention
 - **Mid-course review**: At the halfway point, review weak spots from all completed lessons
 - **Final report**: On completion, generate summary — what was mastered, weak points, next steps
 
@@ -162,5 +191,5 @@ Update `progress/tracking.md` after each lesson:
 | Student says "too easy" | Skip verification, advance to next lesson |
 | Student says "don't understand" | Re-explain from different angle with different analogy |
 | Student goes off-topic | Brief acknowledgment, then redirect: "Good point — let's park that. Back to X" |
-| Student goes silent for hours | On return, confirm progress and resume from breakpoint |
+| Student goes silent for hours | On return, follow Phase 5 Resume flow: read progress, quick recall, assess readiness, continue from breakpoint |
 | Teacher lacks subject depth | Pause teaching, research thoroughly, then resume |
