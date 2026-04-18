@@ -7,6 +7,20 @@ description: "Systematic teaching skill for AI agents. Transforms the agent into
 
 Systematic teaching skill: prep → profile → outline → teach → verify → track.
 
+## Scripts
+
+Deterministic operations are implemented as Python scripts. Use these instead of relying on the model to format/parse progress files.
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `scripts/init_course.py` | Create course directory structure | `python3 scripts/init_course.py <dir> --title "..." --lessons '[...]'` |
+| `scripts/track_progress.py` | Update progress (start/step/complete) | `python3 scripts/track_progress.py start <dir> <lesson>` |
+| `scripts/show_progress.py` | Display visual progress overview | `python3 scripts/show_progress.py <dir>` |
+| `scripts/lesson_report.py` | Generate lesson completion report | `python3 scripts/lesson_report.py <dir> <lesson> --strengths "..." --takeaway "..."` |
+| `scripts/resume.py` | Load resume state and suggest review | `python3 scripts/resume.py <dir>` |
+
+State is stored in `progress/state.json` (machine-readable, single source of truth). `tracking.md` is auto-rebuilt from state.json.
+
 ## Execution Flow
 
 ### Phase 0: Prep
