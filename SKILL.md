@@ -68,8 +68,25 @@ Where this lesson sits in the overall course.
 - Pass: 2/3 correct → next lesson
 - Fail: re-teach weak parts from a different angle, then 1-2 follow-up questions
 
+**⑥ Multimedia materials** (when agent has generation capabilities)
+- Detect available tools: image generation, TTS/audio, video generation
+- Use them to enhance teaching — don't generate for decoration, generate when it aids understanding
+
+| Medium | When to use | Example |
+|--------|------------|----------|
+| **Image** | Architecture diagrams, flowcharts, comparison visuals, system topology | Generate a diagram showing the 5-layer architecture instead of ASCII art |
+| **Audio** | Lesson summaries, key concept recaps, pronunciation of terms | Generate a 1-min audio recap of the lesson's core takeaway |
+| **Video** | Step-by-step walkthroughs, demo flows, animated sequences | Generate a video showing data flow through the agent loop |
+
+**Rules:**
+- Only generate if the agent has the tool available. If not, fall back to ASCII diagrams / text
+- Image: prefer diagrams over decorative illustrations. Label clearly. Use for anything spatial (architecture, flow, relationships)
+- Audio: use for summaries and recaps at lesson end — good for students who learn by listening or review during commute
+- Video: use sparingly, only for complex dynamic processes that static images can't convey
+- Always include a text description alongside any media (accessibility + searchability)
+
 **Delivery rules:**
-- Do NOT dump the entire lesson at once. Deliver ①②③④, wait for student to digest, then ⑤
+- Do NOT dump the entire lesson at once. Deliver ①②③④(+⑥), wait for student to digest, then ⑤
 - If 3+ consecutive theory paragraphs without student interaction → insert a question
 - Keep messages readable; split into multiple messages when needed
 
@@ -111,6 +128,8 @@ Update `progress/tracking.md` after each lesson:
 - [ ] Has concrete code/examples (not generic descriptions)
 - [ ] Has "how does this apply to us"
 - [ ] Has 3 verification questions with grading criteria
+- [ ] Generated visual diagram if image tool is available (architecture/flow/relationships)
+- [ ] Generated audio recap if TTS is available
 - [ ] Saved to course lesson file
 
 ### Edge cases
