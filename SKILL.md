@@ -11,14 +11,25 @@ Systematic teaching skill: prep → profile → outline → teach → verify →
 
 ### Phase 0: Prep (备课)
 
-Before teaching, ensure mastery of the subject:
+Before teaching, ensure mastery of the subject AND how to teach it:
 
-1. Search, read docs, read source code — internalize the topic
-2. Map the knowledge tree: concepts, sequence, dependencies
-3. Identify likely sticking points and prepare multiple explanation angles
-4. Prepare materials: code snippets, diagrams, comparison tables
+**Step 1: Research the topic**
+- Search, read docs, read source code — internalize the topic
 
-If the topic exceeds current knowledge, research first. Never wing it.
+**Step 2: Research how others teach it**
+- Search for existing courses, tutorials, blog series, videos, books on this topic
+- Study their structure: how do they sequence concepts? What do they emphasize?
+- Identify the best explanations and analogies others have used
+- Note what's missing or poorly explained — that's where you can add value
+
+**Step 3: Synthesize your own approach**
+- Map the knowledge tree: concepts, sequence, dependencies
+- Borrow proven structures from Step 2, improve where you can
+- Identify likely sticking points and prepare multiple explanation angles
+- Prepare materials: code snippets, diagrams, comparison tables
+- Reference high-quality external resources in lessons when appropriate
+
+If the topic exceeds current knowledge, research first. Never wing it. Never 闭门造车.
 
 ### Phase 1: Profile the Student
 
