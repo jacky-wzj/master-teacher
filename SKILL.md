@@ -9,53 +9,51 @@ Systematic teaching skill: prep → profile → outline → teach → verify →
 
 ## Scripts
 
-Deterministic operations are implemented as Python scripts. Use these instead of relying on the model to format/parse progress files.
+Deterministic operations use Python scripts. The model handles teaching and judgment; scripts handle state.
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `scripts/init_course.py` | Create course directory structure | `python3 scripts/init_course.py <dir> --title "..." --lessons '[...]'` |
-| `scripts/track_progress.py` | Update progress (start/step/complete) | `python3 scripts/track_progress.py start <dir> <lesson>` |
-| `scripts/show_progress.py` | Display visual progress overview | `python3 scripts/show_progress.py <dir>` |
-| `scripts/lesson_report.py` | Generate lesson completion report | `python3 scripts/lesson_report.py <dir> <lesson> --strengths "..." --takeaway "..."` |
-| `scripts/resume.py` | Load resume state and suggest review | `python3 scripts/resume.py <dir>` |
+| Script | Purpose | When to call |
+|--------|---------|-------------|
+| `scripts/init_course.py` | Create course directory and state files | Phase 2: after student confirms outline |
+| `scripts/track_progress.py start` | Mark a lesson as in-progress | Phase 3: when starting a lesson |
+| `scripts/track_progress.py step` | Record a completed step within a lesson | Phase 3: after each step (position/concepts/code/practice/verify) |
+| `scripts/track_progress.py complete` | Mark a lesson as completed with score | Phase 3: after student passes verification |
+| `scripts/show_progress.py` | Display visual progress overview | Phase 4: after every lesson completion |
+| `scripts/lesson_report.py` | Generate and save lesson report | Phase 4: after every lesson completion (before show_progress) |
+| `scripts/resume.py` | Load resume state and suggest review | Phase 5: when student returns after a break |
 
-State is stored in `progress/state.json` (machine-readable, single source of truth). `tracking.md` is auto-rebuilt from state.json.
+State lives in `progress/state.json` (single source of truth). `tracking.md` is auto-rebuilt by scripts. **Never manually write or edit tracking.md or state.json.**
 
 ## Execution Flow
 
 ### Phase 0: Prep
 
-**Prep is the heaviest phase, not the fastest. It is a long task that may span multiple sessions.**
+**Prep is the heaviest phase. It is a long task that may span multiple sessions.**
 
 **Step 1: Collect materials**
-- Search for courses, tutorials, blogs, books, videos, and source code analysis related to the topic
-- **Save to course directory**:
+- Search for courses, tutorials, blogs, books, videos, and source code analysis on the topic
+- Save to course directory:
   ```
   <course>/prep/
-  ├── sources.md          ← All reference links + one-line evaluation
-  ├── repos/              ← Cloned code repositories
-  ├── articles/           ← Saved articles/PDFs
-  └── notes.md            ← Research notes (key findings, strengths/weaknesses, reusable ideas per source)
+  ├── sources.md       ← All reference links + one-line evaluation
+  ├── repos/           ← Cloned repositories
+  ├── articles/        ← Saved articles/PDFs
+  └── notes.md         ← Research notes per source
   ```
-- Do not stop after one search round. Search iteratively, cross-validate
+- Search iteratively, cross-validate across sources
 
 **Step 2: Study materials**
-- Read each source thoroughly, write notes into notes.md
-- Compare viewpoints across sources (who is right? whose angle is unique?)
-- Identify consensus (points emphasized by multiple sources) and disagreements
-- Do not rush this step. It determines teaching quality
+- Read each source, write findings into notes.md
+- Compare viewpoints (who is right? whose angle is unique?)
+- Identify consensus and disagreements
+- Do not rush this step
 
 **Step 3: Synthesize**
-- Based on research notes, design your own knowledge tree (concepts, sequence, dependencies)
-- Borrow proven structures and explanation angles from existing materials
-- Fill gaps in existing materials (what they missed or explained poorly)
+- Design your knowledge tree (concepts, sequence, dependencies)
+- Borrow proven structures from existing materials
+- Fill gaps (what others missed or explained poorly)
 - Generate prep/synthesis.md: draft teaching plan
 
-**Key principles:**
-- Prep is a long task, not a few seconds
-- Materials must be persisted to disk, not just in conversation context
-- Prep may span multiple sessions
-- When prep is complete, tell the student: "Prep done. Studied X sources. Ready to outline."
+When prep is complete, tell the student: "Prep done. Studied X sources. Ready to outline."
 
 ### Phase 1: Profile the Student
 
@@ -65,177 +63,104 @@ Check USER.md / MEMORY.md first. Only ask what is missing:
 
 ### Phase 2: Outline
 
-1. Split the knowledge tree into lessons. Each lesson = one independently understandable concept unit (not time-based)
-2. Define dependencies between lessons (A before B)
+1. Split knowledge tree into lessons. Each lesson = one independently understandable concept unit
+2. Define dependencies between lessons
 3. Write README.md: goals, outline, one-line summary per lesson
-4. Get student confirmation before starting
-5. Store course files in workspace:
-   ```
-   ~/.openclaw/workspace/<course-name>/
-   ├── README.md
-   ├── lessons/lesson-01-xxx.md
-   └── progress/tracking.md
-   ```
+4. Get student confirmation
+5. **Run:** `scripts/init_course.py <dir> --title "..." --lessons '[...]'`
 
 ### Phase 3: Teach (per lesson)
 
-Deliver each lesson in this order:
+**On lesson start, run:** `scripts/track_progress.py start <dir> <lesson>`
 
-**① Position** (1-2 sentences)
-Where this lesson sits in the overall course.
+Deliver in this order:
 
-**② Core concepts**
-- "Why" first (design intent), then "what" (implementation)
-- Must include comparison: why A over B
-- Use diagrams/tables over prose
+**① Position** — Where this lesson sits in the course (1-2 sentences)
+→ Run: `scripts/track_progress.py step <dir> <lesson> position`
 
-**③ Code / examples**
-- Concrete snippets with key lines annotated
-- Pseudocode → real code, progressive reveal
+**② Core concepts** — "Why" first, then "what". Must include comparison (why A over B). Use diagrams/tables over prose.
+→ Run: `scripts/track_progress.py step <dir> <lesson> concepts`
 
-**④ Relate to practice**
-- "How does this apply to our actual work?" — mandatory every lesson
+**③ Code / examples** — Concrete snippets with key lines annotated. Pseudocode → real code.
+→ Run: `scripts/track_progress.py step <dir> <lesson> code`
 
-**⑤ Verify**
-- 3 questions (max 5):
-  - 1 comprehension (explain in own words)
-  - 1 application (transfer to real scenario)
-  - 1 analysis (compare / evaluate / design)
-- Teacher grades and gives feedback
-- Pass: 2/3 correct → next lesson
-- Fail: re-teach weak parts from a different angle, then 1-2 follow-up questions
+**④ Relate to practice** — "How does this apply to our actual work?" Mandatory every lesson.
+→ Run: `scripts/track_progress.py step <dir> <lesson> practice`
 
-**⑥ Multimedia materials** (when agent has generation capabilities)
-- Detect available tools: image generation, TTS/audio, video generation
-- Use them to enhance teaching — generate when it aids understanding, not for decoration
+**⑤ Multimedia** (when tools are available) — Generate diagrams/audio/video when they aid understanding.
 
-| Medium | When to use | Example |
-|--------|------------|----------|
-| **Image** | Architecture diagrams, flowcharts, comparison visuals, system topology | Generate a diagram showing the 5-layer architecture instead of ASCII art |
-| **Audio** | Lesson summaries, key concept recaps | Generate a 1-min audio recap of the lesson core takeaway |
-| **Video** | Step-by-step walkthroughs, demo flows, animated sequences | Generate a video showing data flow through the agent loop |
+| Medium | When to use |
+|--------|------------|
+| **Image** | Architecture diagrams, flowcharts, system topology |
+| **Audio** | Lesson summary recaps |
+| **Video** | Complex dynamic processes only |
 
-**Multimedia rules:**
-- Only generate if the agent has the tool available. If not, fall back to ASCII diagrams / text
-- Image: prefer diagrams over decorative illustrations. Label clearly. Use for anything spatial (architecture, flow, relationships)
-- Audio: use for summaries and recaps at lesson end — good for review during commute
-- Video: use sparingly, only for complex dynamic processes that static images cannot convey
-- Always include a text description alongside any media (accessibility + searchability)
+Rules: only generate if tool is available; prefer diagrams over decoration; always include text description alongside media.
+
+**⑥ Verify** — 3 questions (max 5): 1 comprehension + 1 application + 1 analysis. Teacher grades and gives feedback.
+- Pass (2/3 correct) → proceed to Phase 4
+- Fail → re-teach weak parts from different angle, then 1-2 follow-up questions
+
+**On pass, run:** `scripts/track_progress.py complete <dir> <lesson> --score <X> [--weak "..."]`
 
 **Delivery rules:**
-- Do NOT dump the entire lesson at once. Deliver ①②③④(+⑥), wait for student to digest, then ⑤
-- If 3+ consecutive theory paragraphs without student interaction → insert a question
-- Keep messages readable; split into multiple messages when needed
+- Deliver ①②③④⑤ first, wait for student to digest, then ⑥
+- If 3+ consecutive theory paragraphs → insert a question
+- Split long messages for readability
 
-### Phase 4: Track Progress and Report
+### Phase 4: Report and Progress
 
-Update `progress/tracking.md` after **every interaction**, not just at lesson completion.
+After each lesson completion, in this order:
 
-**Inter-lesson tracking** (between lessons):
-```markdown
-| Lesson | Title | Status | Date | Score | Weak points |
-|--------|-------|--------|------|-------|-------------|
-| 1 | ... | completed | 2026-04-18 | 3/3 | none |
-| 2 | ... | in-progress | 2026-04-19 | - | - |
-```
+1. **Run:** `scripts/lesson_report.py <dir> <lesson> --strengths "..." --takeaway "..." [--weak "..."]`
+2. **Run:** `scripts/show_progress.py <dir>`
+3. If image generation is available: also generate a visual progress map image
 
-**Intra-lesson tracking** (within a lesson):
-Each lesson has steps: position → concepts → code → practice → multimedia → verify.
-When a lesson is interrupted mid-way, record exactly where:
-```markdown
-### Lesson 2 — in progress
-- Started: 2026-04-19 21:00
-- Completed steps: position, concepts (partial — covered design intent, not yet comparison)
-- Next step: finish comparison in concepts, then code
-- Student's last response: "..."
-- Key points covered so far: ...
-- Key points remaining: ...
-```
+### Phase 5: Resume
 
-This ensures resumption picks up at the exact point, not at the lesson start.
+When the student returns after any break:
 
-**Lesson report** (after each lesson completion):
-When a lesson is completed, deliver a lesson report to the student:
-
-```
-Lesson Report:
-- Lesson: [number] [title]
-- Score: X/3
-- Time spent: approximate
-- Strengths: what the student understood well
-- Weak points: what needs revisiting
-- Key takeaway: one sentence summary of the most important thing learned
-```
-
-**Progress overview** (after each lesson report):
-Immediately after the lesson report, show a visual progress overview of the entire course.
-
-- If image generation is available: generate a progress map image showing all lessons as nodes, completed ones highlighted, current position marked, remaining ones dimmed. Include percentage complete. Make it visually rewarding — seeing progress should feel good.
-- If image generation is not available: use an ASCII progress bar or visual map:
-  ```
-  Course Progress: [===========.................] 4/12 (33%)
-
-  ✅ Lesson 1: Architecture Overview
-  ✅ Lesson 2: Tool System
-  ✅ Lesson 3: QueryEngine
-  ✅ Lesson 4: Context Management     ← just completed
-  ⬜ Lesson 5: Multi-Agent
-  ⬜ Lesson 6: Safety System
-  ...
-  ```
-
-The purpose: every time the student finishes a lesson, they see how far they have come. Small wins compound into motivation.
-
-### Phase 5: Resume (when student returns after interruption)
-
-When the student comes back after any break (minutes, hours, or days):
-
-1. **Read progress file** — check where they left off
-2. **Quick recall** — before continuing, do a 1-2 question micro-review:
-   - If mid-lesson: "Last time we covered X. Quick check — can you explain X in one sentence?"
-   - If between lessons: "Last time you finished Lesson N about X. What was the key takeaway?"
-3. **Assess readiness**:
-   - Student recalls well → continue from breakpoint
-   - Student is fuzzy → brief recap of what was covered, then continue
-   - Student forgot → re-teach the forgotten part before moving forward
-4. **Resume from exact breakpoint** — do not restart the lesson from scratch
+1. **Run:** `scripts/resume.py <dir>` — read output to determine state
+2. Based on output:
+   - `STATUS: mid_lesson` → ask a recall question on what was covered, then continue from the indicated next step
+   - `STATUS: between_lessons` → ask a recall question on the last completed lesson, then start the next
+   - `SPACED_REVIEW_DUE` → do a quick review of indicated lessons before continuing
+3. If student recalls well → continue. If fuzzy → brief recap. If forgot → re-teach before moving forward.
 
 ### Phase 6: Review and Wrap-up
 
-- **Pre-check**: Before starting a new lesson, ask 1 question on the previous lesson core concept. If failed → review first
-- **Spaced review**: At lesson 3, briefly revisit lesson 1 key concept. At lesson 6, revisit lessons 1-3. Spacing improves long-term retention
-- **Mid-course review**: At the halfway point, review weak spots from all completed lessons
-- **Final report**: On completion, generate summary — what was mastered, weak points, next steps
+- **Spaced review**: handled automatically by `resume.py` (triggers at lessons 3, 6, midpoint)
+- **Final report**: on course completion, generate a comprehensive summary — mastery level per lesson, overall weak points, next steps
 
 ## Constraints
 
 ### Teaching principles
 
-1. **Mastery first**: Do not advance if current lesson is not mastered. Slow is fine; half-baked is not
-2. **Student must produce**: Every lesson must have at least one student output (write/draw/design). No passive-only lessons
-3. **Question-driven**: Guide with questions, do not give conclusions
+1. **Mastery first**: do not advance if current lesson is not mastered
+2. **Student must produce**: every lesson needs at least one student output (write/draw/design)
+3. **Question-driven**: guide with questions, do not give conclusions
    - Good: "Why do you think they designed it this way?"
    - Bad: "They designed it this way because..."
-4. **Affirm then correct**: When student is wrong, acknowledge valid reasoning first, then point out the gap
-5. **Match technical depth**: For technical students, go deep by default. Skip basics
-6. **Technical analogies**: Use architecture, design patterns, engineering analogies — not daily life
+4. **Affirm then correct**: acknowledge valid reasoning first, then point out the gap
+5. **Match technical depth**: for technical students, go deep by default
+6. **Technical analogies**: use architecture/design-pattern analogies, not daily life
 
-### Quality checklist (self-check before delivering each lesson)
+### Quality checklist (before delivering each lesson)
 
 - [ ] Has comparison analysis (why A not B)
-- [ ] Has concrete code/examples (not generic descriptions)
+- [ ] Has concrete code/examples
 - [ ] Has "how does this apply to us"
 - [ ] Has 3 verification questions with grading criteria
-- [ ] Generated visual diagram if image tool is available
-- [ ] Generated audio recap if TTS is available
-- [ ] Saved to course lesson file
+- [ ] Generated visual diagram if image tool available
+- [ ] Generated audio recap if TTS available
+- [ ] Saved lesson content to file
 
 ### Edge cases
 
 | Situation | Action |
 |-----------|--------|
-| Student says "too easy" | Skip verification, advance to next lesson |
-| Student says "don't understand" | Re-explain from different angle with different analogy |
-| Student goes off-topic | Brief acknowledgment, then redirect: "Good point — let's park that. Back to X" |
-| Student goes silent for hours | On return, follow Phase 5 Resume flow: read progress, quick recall, assess readiness, continue from breakpoint |
-| Teacher lacks subject depth | Pause teaching, research thoroughly, then resume |
+| "too easy" | Skip verification, advance |
+| "don't understand" | Re-explain from different angle |
+| Goes off-topic | Acknowledge briefly, redirect |
+| Returns after break | Run `scripts/resume.py`, follow Phase 5 |
+| Teacher lacks depth | Pause, research, then resume |
