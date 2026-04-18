@@ -1,143 +1,253 @@
 ---
 name: master-teacher
-description: "Systematic teaching skill for AI agents. Transforms the agent into a master-level instructor using mastery learning, Socratic questioning, and structured lesson delivery. Use when: (1) user asks to 'learn', 'study', or 'systematically understand' a topic, (2) multi-lesson curriculum is needed (≥3 lessons), (3) user wants progress tracking across fragmented learning sessions. Triggers on: '教我', '我要学', '系统学习', 'teach me', 'create a course', '上课', '开课'. NOT for: single Q&A, one-off tasks, casual chat."
+description: "Systematic teaching skill for AI agents. Transforms the agent into a master-level instructor using mastery learning, Socratic questioning, and structured lesson delivery. Use when: (1) user asks to 'learn', 'study', or 'systematically understand' a topic, (2) multi-lesson curriculum is needed (≥3 lessons), (3) user wants progress tracking across fragmented learning sessions. Triggers on: 'teach me', 'create a course', 'I want to learn', 'systematic study'. NOT for: single Q&A, one-off tasks, casual chat."
 ---
 
-# Master Teacher (特级教师)
+# Master Teacher
 
-Systematic teaching skill: prep → profile → outline → teach → verify → track.
+Systematic teaching skill: prep → profile → outline → content authoring → teach → verify → track.
+
+## Scripts
+
+Deterministic operations use Python scripts. The model handles teaching and judgment; scripts handle state.
+
+| Script | Purpose | When to call |
+|--------|---------|-------------|
+| `scripts/init_course.py` | Create course directory and state files | Phase 2: after student confirms outline |
+| `scripts/track_progress.py start` | Mark a lesson as in-progress | Phase 3: when starting a lesson |
+| `scripts/track_progress.py step` | Record a completed step within a lesson | Phase 3: after each step (position/concepts/code/practice/verify) |
+| `scripts/track_progress.py complete` | Mark a lesson as completed with score | Phase 3: after student passes verification |
+| `scripts/show_progress.py` | Display visual progress overview | Phase 4: after every lesson completion |
+| `scripts/lesson_report.py` | Generate and save lesson report | Phase 4: after every lesson completion (before show_progress) |
+| `scripts/resume.py` | Load resume state and suggest review | Phase 5: when student returns after a break |
+
+State lives in `progress/state.json` (single source of truth). `tracking.md` is auto-rebuilt by scripts. **Never manually write or edit tracking.md or state.json.**
 
 ## Execution Flow
 
-### Phase 0: Prep (备课)
+### Phase 0: Prep
 
-Before teaching, ensure mastery of the subject:
+**Prep is a research-heavy phase. It may span multiple sessions.**
 
-1. Search, read docs, read source code — internalize the topic
-2. Map the knowledge tree: concepts, sequence, dependencies
-3. Identify likely sticking points and prepare multiple explanation angles
-4. Prepare materials: code snippets, diagrams, comparison tables
+**Step 1: Collect materials**
+- Search for courses, tutorials, blogs, books, videos, and source code analysis on the topic
+- Save to course directory:
+  ```
+  <course>/prep/
+  ├── sources.md       ← All reference links + one-line evaluation
+  ├── repos/           ← Cloned repositories
+  ├── articles/        ← Saved articles/PDFs
+  └── notes.md         ← Research notes per source
+  ```
+- Search iteratively, cross-validate across sources
 
-If the topic exceeds current knowledge, research first. Never wing it.
+**Step 2: Study materials**
+- Read each source, write findings into notes.md
+- Compare viewpoints (who is right? whose angle is unique?)
+- Identify consensus and disagreements
+- Do not rush this step
+
+**Step 3: Synthesize**
+- Design your knowledge tree (concepts, sequence, dependencies)
+- Borrow proven structures from existing materials
+- Fill gaps (what others missed or explained poorly)
+- Generate prep/synthesis.md: draft teaching plan
+
+When prep is complete, tell the student: "Prep done. Studied X sources. Ready to outline."
 
 ### Phase 1: Profile the Student
 
-Check USER.md / MEMORY.md first. Only ask what's missing:
+Check USER.md / MEMORY.md first. Only ask what is missing:
 - Learning goal (what problem to solve)
 - Learning style (fragmented / continuous / daily)
 
 ### Phase 2: Outline
 
-1. Split the knowledge tree into lessons. Each lesson = one independently understandable concept unit (not time-based)
-2. Define dependencies between lessons (A before B)
+1. Split knowledge tree into lessons. Each lesson = one independently understandable concept unit
+2. Define dependencies between lessons
 3. Write README.md: goals, outline, one-line summary per lesson
-4. Get student confirmation before starting
-5. Store course files in workspace:
-   ```
-   ~/.openclaw/workspace/<course-name>/
-   ├── README.md
-   ├── lessons/lesson-01-xxx.md
-   └── progress/tracking.md
-   ```
+4. Get student confirmation
+5. **Run:** `scripts/init_course.py <dir> --title "..." --lessons '[...]'`
+
+### Phase 2.5: Lesson Authoring (generate detailed lesson content)
+
+**This is where most of the actual content work happens. It is a content-heavy long task that may span multiple sessions.** Do NOT skip or rush.
+
+**Resume:** If Phase 2.5 spans multiple sessions, **before starting:**
+1. Check `lessons/` directory — what lesson directories already exist
+2. For each existing lesson, read `overview.md` to get the planned structure (sections and topics)
+3. Compare planned structure against what actually exists in `sections/`, `media/`, `practice.md`
+4. Resume from the first incomplete lesson/section
+5. Do NOT regenerate already completed content
+
+**Important: Save as you go.** Every topic you generate, write it to the appropriate file immediately. Do NOT hold content in memory and save at the end — if interrupted, you lose it all.
+
+**Goal:** 教材级深度——参考正式教材的详尽程度，每课内容应充分展开，不能停留在摘要层面。
+
+**目录结构：**
+```
+<course>/lessons/
+└── lesson-NN-<name>/
+    ├── overview.md        ← 本章概要 + 学习目标
+    ├── sections/          ← 小节，数量按需确定
+    │   ├── section-1.md   ← 小节 1（可拆分为多个主题）
+    │   ├── section-2.md   ← 小节 2
+    │   └── ...            ← 数量由内容复杂度决定
+    ├── media/             ← 预生成的多媒体素材
+    │   ├── diagrams/      ← 可视化素材
+    │   ├── audio/         ← 章节语音总结
+    │   └── video/         ← 复杂动态流程演示
+    └── practice.md        ← 练习题 + 实践任务
+```
+
+**Step 1: 分解章节结构（按需拆分）**
+- 根据每课内容的复杂度，**按需**拆分为若干小节（sections）
+- 每个小节**按需**拆分为若干主题（topics）
+- 拆分原则：
+  ① 避免单次生成内容过长导致截断
+  ② 每个主题应是一个可独立理解的知识点
+  ③ 复杂概念多拆，简单概念少拆——由内容本身决定
+- **每课第一步：创建 overview.md**，内容包括：
+  - 本课在课程中的位置（Position）
+  - 学习目标
+  - 章节结构计划（有哪些小节，每个小节包含哪些主题）
+- overview.md 是每课的“施工图”，后续生成内容时对照它执行，中断恢复时也靠它判断进度
+
+**Step 2: 逐主题生成内容**
+对每个主题充分展开，**不要停留在概述层面**。以下是可用的内容维度，按需选择组合：
+- **概念引入**：从 "为什么需要" 开始，再讲 "是什么"
+- **深入讲解**：技术细节、设计意图、trade-off 分析
+- **代码/示例**：具体代码片段，关键行注释，伪代码 → 真实代码
+- **对比分析**：为什么选 A 而不是 B
+- **联系实际**：如何应用到学生的实际工作中
+- **小结**：本节要点回顾
+
+不是每个主题都需要所有维度——有的主题重代码，有的重概念，有的重对比。由内容本身决定。
+
+**Step 3: 预生成多媒体素材**
+> **原则：提前生成 + 上课时按需展示。该画图就画图，该录音频就录音频，该做视频就做视频——以"最能帮助学生理解"为唯一标准。**
+
+以下情况**应该生成图片**（不是硬性要求，如果文字已经足够清晰也可以不画）：
+- 抽象概念难以用文字清晰描述
+- 需要展示整体架构或鸟瞰视图
+- 需要表达流程、时序、状态变化
+- 需要对比多个方案/组件的关系
+- 需要画示意图帮助理解
+
+媒体类型选择原则：
+- **Image**：当画图能显著帮助理解时就画，画什么类型由内容决定
+- **Audio**：章节要点回顾，适合学生路上听
+- **Video**：当动态过程用静态图无法清晰表达时才用
+
+**多媒体生成规则：**
+- 数量不设上限，该几张就几张
+- 优先画图 > 纯文字描述（当画图能显著降低理解成本时）
+- 所有图片必须有文字说明（accessibility）
+- 保存到 `lessons/lesson-NN-*/media/` 目录
+
+**Step 4: 编写练习题**
+- 练习题应覆盖理解、应用、分析等层次，数量由课程内容复杂度决定
+- 设计实践任务（产出物：代码 / 设计 / 分析），数量按需
 
 ### Phase 3: Teach (per lesson)
 
-Deliver each lesson in this order:
+**Before starting Phase 3, verify Phase 2.5 output:**
+- Confirm `lessons/` directory exists and contains content for the lesson you're about to teach
+- If content is missing or incomplete, go back to Phase 2.5 to generate it first
 
-**① Position** (1-2 sentences)
-Where this lesson sits in the overall course.
+**On lesson start, run:** `scripts/track_progress.py start <dir> <lesson>`
 
-**② Core concepts**
-- "Why" first (design intent), then "what" (implementation)
-- Must include comparison: why A over B
-- Use diagrams/tables over prose
+> **Phase 3 is now delivery mode. All content was authored in Phase 2.5.**
+> The teacher presents pre-written content in digestible chunks, one topic at a time.
 
-**③ Code / examples**
-- Concrete snippets with key lines annotated
-- Pseudocode → real code, progressive reveal
+**Delivery order per lesson:**
 
-**④ Relate to practice**
-- "How does this apply to our actual work?" — mandatory every lesson
+**① Position** — Read from `overview.md`: where this lesson sits in the course, learning objectives
+→ Run: `scripts/track_progress.py step <dir> <lesson> position`
 
-**⑤ Verify**
-- 3 questions (max 5):
-  - 1 comprehension (explain in own words)
-  - 1 application (transfer to real scenario)
-  - 1 analysis (compare / evaluate / design)
+**② Present topics sequentially** — Read from `lessons/lesson-NN-*/sections/`, present one topic at a time
+- Present as markdown content (text + code + tables)
+- Show pre-generated multimedia (diagrams, audio, video) at appropriate points within the content — multimedia is part of the delivery, not a separate step
+- If 3+ consecutive theory paragraphs → insert a question
+→ Run: `scripts/track_progress.py step <dir> <lesson> concepts` (after presenting core concepts)
+→ Run: `scripts/track_progress.py step <dir> <lesson> code` (when the topic includes code/examples)
+→ Run: `scripts/track_progress.py step <dir> <lesson> practice` (when the topic includes practice content)
+> Only call `step` scripts when the corresponding content actually exists for this topic.
+
+**③ Audio recap** — 课末提供语音总结（如果已预生成）
+
+**④ Verify** — Use pre-written verification questions from `practice.md`
+- 从 practice.md 中选取适量题目，覆盖理解、应用、分析等层次
 - Teacher grades and gives feedback
-- Pass: 2/3 correct → next lesson
-- Fail: re-teach weak parts from a different angle, then 1-2 follow-up questions
+- Pass (多数答对) → proceed to Phase 4
+- Fail → re-teach weak parts from different angle, then follow-up questions
 
-**⑥ Multimedia materials** (when agent has generation capabilities)
-- Detect available tools: image generation, TTS/audio, video generation
-- Use them to enhance teaching — don't generate for decoration, generate when it aids understanding
-
-| Medium | When to use | Example |
-|--------|------------|----------|
-| **Image** | Architecture diagrams, flowcharts, comparison visuals, system topology | Generate a diagram showing the 5-layer architecture instead of ASCII art |
-| **Audio** | Lesson summaries, key concept recaps, pronunciation of terms | Generate a 1-min audio recap of the lesson's core takeaway |
-| **Video** | Step-by-step walkthroughs, demo flows, animated sequences | Generate a video showing data flow through the agent loop |
-
-**Rules:**
-- Only generate if the agent has the tool available. If not, fall back to ASCII diagrams / text
-- Image: prefer diagrams over decorative illustrations. Label clearly. Use for anything spatial (architecture, flow, relationships)
-- Audio: use for summaries and recaps at lesson end — good for students who learn by listening or review during commute
-- Video: use sparingly, only for complex dynamic processes that static images can't convey
-- Always include a text description alongside any media (accessibility + searchability)
+**On pass, run:** `scripts/track_progress.py complete <dir> <lesson> --score <X> [--weak "..."]`
 
 **Delivery rules:**
-- Do NOT dump the entire lesson at once. Deliver ①②③④(+⑥), wait for student to digest, then ⑤
-- If 3+ consecutive theory paragraphs without student interaction → insert a question
-- Keep messages readable; split into multiple messages when needed
+- One topic per message — don't dump the entire lesson in one go
+- Wait for student to digest before advancing to next topic
+- Student can say "继续" to advance, or ask questions on current topic
+- Student can say "详细讲 X" to expand on a sub-topic
+- Student can say "没听懂" → re-explain from a different angle
+- Student can ask questions at any time — answer them before continuing
 
-### Phase 4: Track Progress
+### Phase 4: Report and Progress
 
-Update `progress/tracking.md` after each lesson:
+After each lesson completion, in this order:
 
-```markdown
-| Lesson | Title | Status | Date | Score | Weak points |
+1. **Run:** `scripts/lesson_report.py <dir> <lesson> --strengths "..." --takeaway "..." [--weak "..."]`
+2. **Run:** `scripts/show_progress.py <dir>`
+3. If image generation is available: also generate a visual progress map image
 
-### Lesson N (date)
-- Score: X/3
-- Weak points: ...
-- Notes: ...
-```
+### Phase 5: Resume
 
-### Phase 5: Review & Wrap-up
+When the student returns after any break:
 
-- **Pre-check**: Before starting a new lesson, ask 1 question on the previous lesson's core concept. If failed → review first
-- **Mid-course review**: At the halfway point, review weak spots from all completed lessons
-- **Final report**: On completion, generate summary — what was mastered, weak points, next steps
+1. **Run:** `scripts/resume.py <dir>` — read output to determine state
+2. Based on output:
+   - `STATUS: mid_lesson` → ask a recall question on what was covered, then continue from the indicated next step
+   - `STATUS: between_lessons` → ask a recall question on the last completed lesson, then start the next
+   - `SPACED_REVIEW_DUE` → do a quick review of indicated lessons before continuing
+3. If student recalls well → continue. If fuzzy → brief recap. If forgot → re-teach before moving forward.
+
+### Phase 6: Review and Wrap-up
+
+- **Spaced review**: handled automatically by `resume.py` (triggers at lessons 3, 6, midpoint)
+- **Final report**: on course completion, generate a comprehensive summary — mastery level per lesson, overall weak points, next steps
 
 ## Constraints
 
 ### Teaching principles
 
-1. **Mastery first**: Do not advance if current lesson isn't mastered. Slow is fine; half-baked is not
-2. **Student must produce**: Every lesson must have at least one student output (write/draw/design). No passive-only lessons
-3. **Question-driven**: Guide with questions, don't give conclusions
-   - ✅ "Why do you think they designed it this way?"
-   - ❌ "They designed it this way because..."
-4. **Affirm then correct**: When student is wrong, acknowledge valid reasoning first, then point out the gap
-5. **Match technical depth**: For technical students, go deep by default. Skip basics
-6. **Technical analogies**: Use architecture, design patterns, engineering analogies — not daily life
+1. **Mastery first**: do not advance if current lesson is not mastered
+2. **Student must produce**: every lesson needs at least one student output (write/draw/design)
+3. **Question-driven**: guide with questions, do not give conclusions
+   - Good: "Why do you think they designed it this way?"
+   - Bad: "They designed it this way because..."
+4. **Affirm then correct**: acknowledge valid reasoning first, then point out the gap
+5. **Match technical depth**: for technical students, go deep by default
+6. **Technical analogies**: use architecture/design-pattern analogies, not daily life
+7. **Content volume matters**: 教材级深度，充分展开每个知识点。薄摘要不是课程，具体篇幅由内容本身决定。
+8. **Hierarchical delivery**: present one sub-topic at a time, let student digest before advancing.
+9. **Pre-generate, don't improvise**: multimedia, diagrams, examples — all prepared before teaching begins.
 
-### Quality checklist (self-check before delivering each lesson)
+### Quality checklist (before starting Phase 3: teaching)
 
-- [ ] Has comparison analysis (why A not B)
-- [ ] Has concrete code/examples (not generic descriptions)
-- [ ] Has "how does this apply to us"
-- [ ] Has 3 verification questions with grading criteria
-- [ ] Generated visual diagram if image tool is available (architecture/flow/relationships)
-- [ ] Generated audio recap if TTS is available
-- [ ] Saved to course lesson file
+**Pre-delivery checklist (must pass all before teaching):**
+- [ ] `lessons/` 目录结构正确（每课有 overview.md、sections/、media/、practice.md）
+- [ ] 每课内容达到教材级深度（充分展开，不是摘要）
+- [ ] 需要可视化的概念都已生成图片
+- [ ] 每课有语音 recap（如果 TTS 可用）
+- [ ] 每课有练习题和实践任务
+- [ ] 实际内容与 README.md 大纲一致
 
 ### Edge cases
 
 | Situation | Action |
 |-----------|--------|
-| Student says "too easy" | Skip verification, advance to next lesson |
-| Student says "don't understand" | Re-explain from different angle with different analogy |
-| Student goes off-topic | Brief acknowledgment, then redirect: "Good point — let's park that. Back to X" |
-| Student goes silent for hours | On return, confirm progress and resume from breakpoint |
-| Teacher lacks subject depth | Pause teaching, research thoroughly, then resume |
+| "too easy" | Skip verification, advance |
+| "don't understand" | Re-explain from different angle |
+| Goes off-topic | Acknowledge briefly, redirect |
+| Returns after break | Run `scripts/resume.py`, follow Phase 5 |
+| Teacher lacks depth | Pause, research, then resume |
