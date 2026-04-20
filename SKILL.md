@@ -15,7 +15,7 @@ Deterministic operations use Python scripts. The model handles teaching and judg
 |--------|---------|-------------|
 | `scripts/init_course.py` | Create course directory and state files | Phase 2: after student confirms outline |
 | `scripts/track_progress.py start` | Mark a lesson as in-progress | Phase 3: when starting a lesson |
-| `scripts/track_progress.py step` | Record a completed step within a lesson | Phase 3: after each step (position/concepts/code/practice/verify) |
+| `scripts/track_progress.py step` | Record a completed step within a lesson | Phase 3: after each step (position/concepts/code/practice) |
 | `scripts/track_progress.py complete` | Mark a lesson as completed with score | Phase 3: after student passes verification |
 | `scripts/show_progress.py` | Display visual progress overview | Phase 4: after every lesson completion |
 | `scripts/lesson_report.py` | Generate and save lesson report | Phase 4: after every lesson completion (before show_progress) |
@@ -70,6 +70,8 @@ Check USER.md / MEMORY.md first. Only ask what is missing:
 5. **Run:** `scripts/init_course.py <dir> --title "..." --lessons '[...]'`
 
 ### Phase 2.5: Lesson Authoring (generate detailed lesson content)
+
+**Run this immediately after Phase 2 outline is confirmed.** This phase generates all lesson content (sections, media, practice) before any teaching begins. Do NOT proceed to Phase 3 until all lessons are fully authored.
 
 **This is where most of the actual content work happens. It is a content-heavy long task that may span multiple sessions.** Do NOT skip or rush.
 
@@ -153,7 +155,8 @@ Check USER.md / MEMORY.md first. Only ask what is missing:
 
 **Before starting Phase 3, verify Phase 2.5 output:**
 - Confirm `lessons/` directory exists and contains content for the lesson you're about to teach
-- If content is missing or incomplete, go back to Phase 2.5 to generate it first
+- **If content is missing or incomplete, DO NOT generate it during Phase 3.** Stop teaching, go back to Phase 2.5, complete the missing content first, then return to Phase 3.
+- **Phase 3 is delivery only — never generate new lesson content during class.** The only content you may create on the fly is supplementary (e.g., answering an unexpected student question, generating a quick clarification diagram if needed). All core lesson content (sections, media, practice) must be pre-authored.
 
 **On lesson start, run:** `scripts/track_progress.py start <dir> <lesson>`
 
@@ -231,13 +234,14 @@ When the student returns after any break:
 7. **Content volume matters**: 教材级深度，充分展开每个知识点。薄摘要不是课程，具体篇幅由内容本身决定。
 8. **Hierarchical delivery**: present one sub-topic at a time, let student digest before advancing.
 9. **Pre-generate, don't improvise**: multimedia, diagrams, examples — all prepared before teaching begins.
+10. **Never generate lesson content during class**: Phase 3 is delivery mode only. If content is incomplete, pause teaching, complete Phase 2.5 first, then resume delivery.
 
 ### Quality checklist (before starting Phase 3: teaching)
 
 **Pre-delivery checklist (must pass all before teaching):**
 - [ ] `lessons/` 目录结构正确（每课有 overview.md、sections/、media/、practice.md）
 - [ ] 每课内容达到教材级深度（充分展开，不是摘要）
-- [ ] 需要可视化的概念都已生成图片
+- [ ] 如果生图工具可用，需要可视化的概念都已生成图片；如果工具不可用，至少用 ASCII 图或文字图示替代
 - [ ] 每课有语音 recap（如果 TTS 可用）
 - [ ] 每课有练习题和实践任务
 - [ ] 实际内容与 README.md 大纲一致
