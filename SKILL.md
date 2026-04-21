@@ -235,6 +235,8 @@ When the student returns after any break:
 8. **Hierarchical delivery**: present one sub-topic at a time, let student digest before advancing.
 9. **Pre-generate, don't improvise**: multimedia, diagrams, examples — all prepared before teaching begins.
 10. **Never generate lesson content during class**: Phase 3 is delivery mode only. If content is incomplete, pause teaching, complete Phase 2.5 first, then resume delivery.
+11. **State facts before comparing**: don't assume the student knows the result. Always tell them the fact first, then do the comparison. Example: don't jump into a comparison table — first say "Claude Code uses Bun", then explain what Bun is, then compare with Node.js.
+12. **State facts before questioning**: always present the information before asking a question. Don't open a section with a question the student can't yet answer. The flow should be: fact → explanation → question.
 
 ### Quality checklist (before starting Phase 3: teaching)
 
